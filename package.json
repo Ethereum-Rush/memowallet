@@ -1,0 +1,25 @@
+{
+  "name": "rush",
+  "version": "1.0.0",
+  "description": "Ethereum eRush's memo supported mobile wallet ",
+  "main": "app.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ethereum-Rush/memowallet.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ethereum-Rush/memowallet/issues"
+  },
+  "homepage": "https://github.com/Ethereum-Rush/memowallet#readme",
+  "devDependencies": {
+    "electron": "^8.2.1"
+  },
+  "dependencies": {
+    "ethereumjs-tx": "^2.1.2"
+  }
+}
