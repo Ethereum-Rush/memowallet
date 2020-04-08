@@ -34,10 +34,10 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    'min-width': 400,
-    'min-height': 200,
+    width: 500,
+    height: 800,
+    'min-width': 300,
+    'min-height': 600,
     'accept-first-mouse': true,
     'title-bar-style': 'hidden',
     webPreferences: {
