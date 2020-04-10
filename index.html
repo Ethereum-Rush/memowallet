@@ -57,17 +57,24 @@
             </div>
         </div>
         <div class="container top-100">
+
+
             <div class="card mb-4 shadow">
                 <div class="card-body border-bottom">
                     <div class="row">
-                        <div class="col">
+
+                        <div class="col" style="display:none;">
                             <h3 class="mb-0 font-weight-normal">548.00 ETR</h3>
                             <p class="text-mute">Balance</p>
                         </div>
 
+                        <div class="col login">
+                            <input id="priv" type="text" style="width:100%; "  placeholder="Private Key or 12 Words" name="pkey"/><br>
+                              <button id="connect" class="btn btn-primary"  style="width:100%; ">Connect</button>
+                        </div>
+
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -243,7 +250,26 @@
     <script src="js/main.js"></script>
 
     <!-- page level script -->
-    <script></script>
+
+
+<script type="text/javascript">
+window.$ = window.jQuery = require('jquery');
+//const ipc = require('electron').ipcRenderer;
+const { ipcRenderer } = require('electron');
+let mybutton = document.querySelector("#connect");
+let ethereumPrivateKey =  document.querySelector("#priv");
+
+
+mybutton.addEventListener("click", () => {
+  ipcRenderer.send("receivekey", ethereumPrivateKey.value.trim());
+});
+
+
+
+
+
+
+</script>
 
 </body>
 

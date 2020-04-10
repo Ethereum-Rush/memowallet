@@ -1,9 +1,9 @@
 var electron = require('electron');  // Module to control application life.
 //var BrowserWindow = require('browser-window');  // Module to create native browser window.
-const {app, ipcRenderer, BrowserWindow, ipcMain, dialog} =  electron;
+const {app, ipcRenderer, BrowserWindow, ipcMain, dialog} =  require('electron');
 const Tx = require('ethereumjs-tx').Transaction
 var pkkey = '';
-var web3 = '';
+var web3 = 'https://mainnet.infura.io/v3/';
 var Web3 = require('web3');
 var hdkey = require('ethereumjs-wallet/hdkey');
 const ethUtils = require('ethereumjs-util');
@@ -28,11 +28,12 @@ app.on('window-all-closed', function() {
     app.quit();
   }
 });
-
+//app.allowRendererProcessReuse = true;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.on('ready', function() {
-  // Create the browser window.
+  console.log("ready");
+  app.getVersion();
   mainWindow = new BrowserWindow({
     width: 500,
     height: 800,
@@ -44,8 +45,6 @@ app.on('ready', function() {
             nodeIntegration: true
         }
   });
-
-  // and load the index.html of the app.
   mainWindow.loadURL(
     url.format({
         pathname: path.join(__dirname,"/index.html"),
@@ -53,94 +52,12 @@ app.on('ready', function() {
         slashes:true
     })
   );
-
-  // Emitted when the window is closed.
-  mainWindow.on('closed', function() {
-    mainWindow = null;
-  });
-
-
-ipcMain.on('chwweii', (event, xx) => {
-  console.log("asdad", xx);
-  globalGwei = String(xx);
-  console.log("typeeee", typeof globalGwei);
-  mainWindow.send("okeygwei", xx);
-});
-
-ipcMain.on('beminer', (event, mamount) => {
-
-      var MyContract = new web3.eth.Contract(abi, contractAddress, {
-          from: myetheraddress, // default from address
-          gasPrice: '40000000000' // default gas price in wei, 20 gwei in this case
-      });
-
-
-    MyContract.methods.becameaminer(parseInt(mamount)).estimateGas({from: myetheraddress})
-      .then(function(gasAmount){
-
-              console.log("gasolina for getDailyReward", gasAmount);
-              web3.eth.getTransactionCount(myetheraddress).then(function(nonce){
-                console.log("my nonce value is here:", nonce);
-
-                dataTx = MyContract.methods.becameaminer(mamount).encodeABI();  //The encoded ABI of the method
-                 var rawTx = {
-                 'chainId': 1,
-                 'gas': web3.utils.toHex(gasAmount),
-                 'data':dataTx,
-                 'to': contractAddress,
-                 'gasPrice': web3.utils.toHex(web3.utils.toWei(globalGwei, 'gwei')),
-                 'nonce':  web3.utils.toHex(nonce) }
-
-                 var tx = new Tx(rawTx);
-                 console.log(tx);
-                 tx.sign(pkkey);
-                 var serializedTx = tx.serialize();
-                 console.log(serializedTx);
-                 web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
-              });
-      })
-      .catch(function(err){
-            console.log("gasolina err for getrewardnow", err);
-      });
-
-
-
+mainWindow.on('closed', function() {
+  mainWindow = null;
 });
 
 
-  ipcMain.on('key', (event, privateKey) => {
-    //console.log(arg) // prints "ping"
-    //var buf = Buffer.from(arg, 'utf8');
-
-    web3 = new Web3(privateKey["privder"]);
-    checkxx = privateKey["pkey"].split(" ").length-1
-    console.log(checkxx);
-    var mnemonic = privateKey["pkey"];
-    if(checkxx > 10){
-      const HDWallet = require('ethereum-hdwallet')
-      const hdwallet = HDWallet.fromMnemonic(mnemonic);
-      console.log(`0x${hdwallet.derive(`m/44'/60'/0'/0/0`).getAddress().toString('hex')}`)
-      var adasd = hdwallet.derive(`m/44'/60'/0'/0/0`).getPrivateKey().toString('hex')
-      var privateKey = Buffer.from(adasd, 'hex' );
-
-
-      myetheraddress = `0x${hdwallet.derive(`m/44'/60'/0'/0/0`).getAddress().toString('hex')}`; //ethUtils.privateToAddress(privateKey).toString('hex')
-      console.log(privateKey);
-      console.log(myetheraddress);
-      pkkey = privateKey;
-      continuexx();
-    } else {
-      var privateKey = Buffer.from(privateKey["pkey"], 'hex' );
-      myetheraddress = ethUtils.privateToAddress(privateKey).toString('hex')
-      console.log(privateKey);
-      console.log(myetheraddress);
-      pkkey = privateKey;
-      continuexx();
-    }
-
-  });
-
-
-
-
+ipcMain.on('receivekey', (event, privateKey) => {
+    console.log("im here!!!", privateKey);
+});
 });
