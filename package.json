@@ -20,10 +20,11 @@
     "electron": "^7.1.2"
   },
   "dependencies": {
+    "electron": "^7.1.2",
+    "ethereum-hdwallet": "0.0.26",
     "ethereumjs-tx": "^2.1.2",
     "ethereumjs-wallet": "^0.6.3",
     "jquery": "^3.5.0",
-    "web3": "^1.2.6",
-    "electron": "^7.1.2"
+    "web3": "^1.2.6"
   }
 }

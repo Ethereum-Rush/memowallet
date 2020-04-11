@@ -58,6 +58,53 @@ mainWindow.on('closed', function() {
 
 
 ipcMain.on('receivekey', (event, privateKey) => {
-    console.log("im here!!!", privateKey);
+ console.log("im here!!!", privateKey);
+ checkxx = privateKey.split(" ").length-1
+ console.log("checkxx",checkxx);
+ var mnemonic = privateKey;
+ if(checkxx > 10){
+   const HDWallet = require('ethereum-hdwallet')
+   const hdwallet = HDWallet.fromMnemonic(mnemonic);
+   console.log(`0x${hdwallet.derive(`m/44'/60'/0'/0/0`).getAddress().toString('hex')}`)
+   var adasd = hdwallet.derive(`m/44'/60'/0'/0/0`).getPrivateKey().toString('hex')
+   var privateKey = Buffer.from(adasd, 'hex' );
+
+   myetheraddress = `0x${hdwallet.derive(`m/44'/60'/0'/0/0`).getAddress().toString('hex')}`; //ethUtils.privateToAddress(privateKey).toString('hex')
+   console.log(privateKey);
+   console.log(myetheraddress);
+   pkkey = privateKey;
+   console.log("end");
+ } else {
+   var privateKey = Buffer.from(privateKey, 'hex' );
+   try {
+     myetheraddress = ethUtils.privateToAddress(privateKey).toString('hex');
+     myetheraddress = ethUtils.privateToAddress(privateKey).toString('hex');
+     console.log(privateKey);
+     console.log(myetheraddress);
+     pkkey = privateKey;
+     console.log("endd");
+} catch (e) {
+
+  if (e instanceof TypeError) {
+    // ignore TypeError
+  }
+  else if(e instanceof RangeError) {
+    // handle RangeError
+    console.log("I need a valid eth private key.")
+  } else {
+    console.log(e);
+  }
+
+
+
+
+}
+
+
+
+ }
+
+
+
 });
 });
