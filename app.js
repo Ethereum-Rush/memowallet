@@ -3,8 +3,8 @@ var electron = require('electron');  // Module to control application life.
 const {app, ipcRenderer, BrowserWindow, ipcMain, dialog} =  require('electron');
 const Tx = require('ethereumjs-tx').Transaction
 var pkkey = '';
-var web3 = 'https://mainnet.infura.io/v3/';
 var Web3 = require('web3');
+const web3 = new Web3('https://mainnet.infura.io/v3/');
 var hdkey = require('ethereumjs-wallet/hdkey');
 const ethUtils = require('ethereumjs-util');
 var oldresult = 999999999;
@@ -74,6 +74,7 @@ ipcMain.on('receivekey', (event, privateKey) => {
    console.log(myetheraddress);
    pkkey = privateKey;
    console.log("end");
+   getbalance();
  } else {
    var privateKey = Buffer.from(privateKey, 'hex' );
    try {
@@ -83,6 +84,8 @@ ipcMain.on('receivekey', (event, privateKey) => {
      console.log(myetheraddress);
      pkkey = privateKey;
      console.log("endd");
+
+     getbalance();
 } catch (e) {
 
   if (e instanceof TypeError) {
@@ -91,9 +94,89 @@ ipcMain.on('receivekey', (event, privateKey) => {
   else if(e instanceof RangeError) {
     // handle RangeError
     console.log("I need a valid eth private key.")
+
+    const options = {
+    type: 'question',
+    buttons: ['Okey.'],
+    defaultId: 2,
+    title: 'Warning',
+    message: 'Ethereum private key problem',
+    detail: 'I need a valid eth private key.',
+  };
+
+  dialog.showMessageBox(null, options, (response, checkboxChecked) => {
+    console.log(response);
+    console.log(checkboxChecked);
+  });
+
   } else {
     console.log(e);
   }
+}
+ }
+});
+
+
+
+
+
+function getbalance() {
+
+
+        const grpice  = web3.eth.getGasPrice().then(function(networkgasprice){
+
+
+          console.log("networkgasprice",networkgasprice)
+
+          var MyContract = new web3.eth.Contract(abi, contractAddress, {
+              from: myetheraddress,
+              gasPrice: web3.utils.toWei(networkgasprice, 'gwei')
+          });
+
+          web3.eth.getBalance(myetheraddress).then(function(balance){
+            var bal = web3.utils.fromWei(balance);
+            if(bal < 0.01) {
+                const options = {
+                type: 'question',
+                buttons: ['I understand problem, i will load ethereum to this address.'],
+                defaultId: 2,
+                title: 'Warning',
+                message: 'Ethereum balance problem',
+                detail: 'Hola, you need minimum 0.01 ethereum balance. Because of ethereum eRush write functions.',
+              };
+
+              dialog.showMessageBox(null, options, (response, checkboxChecked) => {
+                console.log(response);
+                console.log(checkboxChecked);
+              });
+            } else {
+                  console.log("eawc");
+                  var detailz = {}
+                  detailz['ethbalance'] = parseFloat(bal).toFixed(4);
+                  detailz['address'] = myetheraddress
+
+                  MyContract.methods.balanceOf(myetheraddress).call().then(function(result){
+                  var myTokenBalance = result;
+                  var tokenbalance = web3.utils.fromWei(myTokenBalance);
+                  console.log(tokenbalance);
+                  detailz['eerbalance'] = parseFloat(tokenbalance).toFixed(2);
+                  mainWindow.send("getdatils", detailz);
+               });
+
+
+            }
+          });
+
+
+
+
+
+        }).catch(function(err){
+          console.log(err)
+        });
+
+
+
 
 
 
@@ -101,10 +184,4 @@ ipcMain.on('receivekey', (event, privateKey) => {
 }
 
 
-
- }
-
-
-
-});
 });

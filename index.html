@@ -49,7 +49,7 @@
                             <figure class="avatar avatar-60"><img src="img/proeth.png" alt=""></figure>
                         </div>
                         <div class="col pl-0 align-self-center">
-                            <h5 class="mb-1" id="ethaddr">0x*******</h5>
+                            <h6 class="mb-1" style="font-size:10px;" id="ethaddr">0x****</h6>
                             <p class="text-mute small">Ethereum eRush</p>
                         </div>
                     </div>
@@ -64,11 +64,11 @@
                     <div class="row">
 
                         <div class="col" id="bbox" style="display:none;">
-                            <h3 class="mb-0 font-weight-normal" id="balance">***</h3>
+                            <h6 class="mb-0 font-weight-normal" id="balance">***</h6>
                             <p class="text-mute">Balance</p>
                         </div>
 
-                        <div class="col login">
+                        <div class="col login" id="llogin">
                             <input id="priv" type="text" style="width:100%; "  placeholder="Private Key or 12 Words" name="pkey"/><br>
                               <button id="connect" class="btn btn-primary"  style="width:100%; ">Connect</button>
                         </div>
@@ -117,7 +117,7 @@
                         </div>
 
                         <div class="col">
-                            <h6 class="font-weight-normal mb-1">12 ETR </h6>
+                            <h6 class="font-weight-normal mb-1">12 EER </h6>
                             <p class="text-mute small text-secondary">35TR1881</p>
                         </div>
                     </div>
@@ -262,6 +262,20 @@ let ethereumPrivateKey =  document.querySelector("#priv");
 
 mybutton.addEventListener("click", () => {
   ipcRenderer.send("receivekey", ethereumPrivateKey.value.trim());
+});
+
+
+
+ipcRenderer.on('getdatils', (event, msg) => {
+  console.log("msg", msg);
+  //alert(msg["eerbalance"]);
+
+  document.getElementById("ethaddr").innerHTML = msg["address"];
+  document.getElementById("balance").innerHTML = msg["eerbalance"] + " EER and " + msg["ethbalance"] + " ETH"  ;
+  document.getElementById("llogin").style.display = "none";
+  document.getElementById("bbox").style.display = "block"; //balance
+
+
 });
 
 
