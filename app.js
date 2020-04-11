@@ -10,6 +10,7 @@ const ethUtils = require('ethereumjs-util');
 var oldresult = 999999999;
 var myetheraddress;
 var globalGwei = "10";
+var publickey = '';
 
 
 const contractAddress = "0x6EA53dfc58C5cbf68a799EdD208cb3A905db5939"
@@ -57,6 +58,12 @@ mainWindow.on('closed', function() {
 });
 
 
+
+ipcMain.on('sendmemoplease', (event, memodetails) => {
+  console.log(memodetails);
+});
+
+
 ipcMain.on('receivekey', (event, privateKey) => {
  console.log("im here!!!", privateKey);
  checkxx = privateKey.split(" ").length-1
@@ -68,8 +75,13 @@ ipcMain.on('receivekey', (event, privateKey) => {
    console.log(`0x${hdwallet.derive(`m/44'/60'/0'/0/0`).getAddress().toString('hex')}`)
    var adasd = hdwallet.derive(`m/44'/60'/0'/0/0`).getPrivateKey().toString('hex')
    var privateKey = Buffer.from(adasd, 'hex' );
+   console.log("public keyyy",  hdwallet.derive(`m/44'/60'/0'/0/0`).getPublicKey().toString('hex'));
+   publickey =  hdwallet.derive(`m/44'/60'/0'/0/0`).getPublicKey().toString('hex')
+
 
    myetheraddress = `0x${hdwallet.derive(`m/44'/60'/0'/0/0`).getAddress().toString('hex')}`; //ethUtils.privateToAddress(privateKey).toString('hex')
+   console.log("public keyyy",  hdwallet.derive(`m/44'/60'/0'/0/0`).getPublicKey().toString('hex'));
+   publickey =  hdwallet.derive(`m/44'/60'/0'/0/0`).getPublicKey().toString('hex')
    console.log(privateKey);
    console.log(myetheraddress);
    pkkey = privateKey;
@@ -154,12 +166,40 @@ function getbalance() {
                   var detailz = {}
                   detailz['ethbalance'] = parseFloat(bal).toFixed(4);
                   detailz['address'] = myetheraddress
-
+                  detailz['publickey'] = publickey
                   MyContract.methods.balanceOf(myetheraddress).call().then(function(result){
                   var myTokenBalance = result;
                   var tokenbalance = web3.utils.fromWei(myTokenBalance);
                   console.log(tokenbalance);
                   detailz['eerbalance'] = parseFloat(tokenbalance).toFixed(2);
+
+                  MyContract.methods.getmemotextcountforaddr(myetheraddress).call().then(function(result){
+                      console.log("resolt", result);
+                      if(result == 0){
+                        console.log("dont have an any message");
+                      } else {
+
+                        var myray = [...Array(result).keys()];
+
+                        for (i = 0; i < result; i++) {
+                           console.log("xxx",i);
+                           MyContract.methods.checkmemopurchases(myetheraddress, i).call().then(function(result){
+                             console.log("resolt", result);
+                             mainWindow.send("appendnewmemo", result);
+                           });
+
+                        }
+                      }
+
+
+
+
+
+                   });
+
+
+
+
                   mainWindow.send("getdatils", detailz);
                });
 

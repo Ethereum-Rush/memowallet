@@ -49,8 +49,8 @@
                             <figure class="avatar avatar-60"><img src="img/proeth.png" alt=""></figure>
                         </div>
                         <div class="col pl-0 align-self-center">
-                            <h6 class="mb-1" style="font-size:10px;" id="ethaddr">0x****</h6>
-                            <p class="text-mute small">Ethereum eRush</p>
+                            <input type="text" id="ethaddr" style="width:100%; background-color:transparent;color:white;border:0 solid black;" />
+                            <input type="text" id="publickey" style="width:100%; background-color:transparent;color:white;border:0 solid black;" />
                         </div>
                     </div>
                 </div>
@@ -91,11 +91,11 @@
 
 
                       <div class="col login">
-                          <input type="text" style="width:100%; "  placeholder="receiver" name="rece"/><br>
-                          <input type="number" style="width:100%;" placeholder="amount" name="amountify"/><br>
-                          <input type="text" style="width:100%; "  placeholder="memo" name="memo"/><br>
+                          <input type="text" style="width:100%; "  placeholder="receiver" id="rece" name="rece"/><br>
+                          <input type="number" style="width:100%;" placeholder="amount" id="amountify" name="amountify"/><br>
+                          <input type="text" style="width:100%; "  placeholder="memo" id="memo" name="memo"/><br>
 
-                          <button class="btn btn-primary"  style="width:100%; ">Send</button>
+                          <button class="btn btn-primary" id="smemo"  style="width:100%; ">Send</button>
 
 
                       </div>
@@ -107,21 +107,13 @@
           </div>
 
             <h6 class="subtitle">Transaction List</h6>
-            <div class="card shadow border-0 mb-3">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto pr-0">
-                            <div class="avatar avatar-60 no-shadow border-0">
-                                <img src="img/swal.png" alt="">
-                            </div>
-                        </div>
 
-                        <div class="col">
-                            <h6 class="font-weight-normal mb-1">12 EER </h6>
-                            <p class="text-mute small text-secondary">35TR1881</p>
-                        </div>
-                    </div>
-                </div>
+            <div  id="txlist">
+
+
+
+
+
             </div>
 
         </div>
@@ -265,13 +257,54 @@ mybutton.addEventListener("click", () => {
 });
 
 
+$("#smemo").click(function() {
+
+   var receiver = $("#rece").val();
+   var amount = $("#amountify").val();
+   var memoo  = $("#memo").val();
+
+   var memodetails = {}
+   memodetails["rece"] = receiver;//.trim();
+   memodetails["amount"] = amount;//.trim();
+   memodetails["memoo"] = memoo;//.trim();
+
+  ipcRenderer.send("sendmemoplease", memodetails);
+});
+
+
+
+
+ipcRenderer.on('appendnewmemo', (event, msg) => {
+
+  $("#txlist").append('<div class="card shadow border-0 mb-3">'+
+  '<div class="card-body">'+
+      '<div class="row align-items-center">'+
+          '<div class="col-auto pr-0">'+
+              '<div class="avatar avatar-60 no-shadow border-0">'+
+                  '<img src="img/swal.png" alt="">'+
+              '</div>'+
+          '</div>'+
+          '<div class="col">'+
+              '<h6 class="font-weight-normal mb-1">'+ msg["1"] +' EER </h6>'+
+              '<p class="text-mute small text-secondary"> '+ msg["2"] +' </p>'+
+          '</div>'+
+      '</div>'+
+      '</div>'+
+  '</div>');
+  //alert(msg["2"])
+
+
+
+});
+
 
 ipcRenderer.on('getdatils', (event, msg) => {
   console.log("msg", msg);
   //alert(msg["eerbalance"]);
-
-  document.getElementById("ethaddr").innerHTML = msg["address"];
   document.getElementById("balance").innerHTML = msg["eerbalance"] + " EER and " + msg["ethbalance"] + " ETH"  ;
+  //document.getElementById("publickey").innerHTML = "Public Key 4 ENC "+msg["publickey"];
+  $("#publickey").val(msg["publickey"]);
+  $("#ethaddr").val(msg["address"]);
   document.getElementById("llogin").style.display = "none";
   document.getElementById("bbox").style.display = "block"; //balance
 
