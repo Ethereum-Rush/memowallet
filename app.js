@@ -59,6 +59,13 @@ mainWindow.on('closed', function() {
 
 
 
+ipcMain.on('rreloader', (event, memodetails) => {
+   console.log(memodetails);
+   getbalance();
+
+
+});
+
 ipcMain.on('sendmemoplease', (event, memodetails) => {
   console.log(memodetails);
   if(memodetails["amount"] == '' || memodetails["memoo"] == '' || memodetails["rece"] == '') {

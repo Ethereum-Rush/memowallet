@@ -106,8 +106,10 @@
                   </div>
               </div>
           </div>
-
+            <div>
             <h6 class="subtitle">Memo TXs List</h6>
+          </div>
+          <div class="clear"></div>
 
             <div  id="txlist">
 
@@ -116,6 +118,8 @@
 
 
             </div>
+
+            <button id="rreloader" class="btn btn-primary" style="width:100%;">Reload</button>
 
         </div>
 
@@ -262,7 +266,11 @@ $("#connect").click(function() {
 });
 
 
+$("#rreloader").click(function() {
+  $("#txlist").html("");
+ipcRenderer.send("rreloader", "reload");
 
+});
 
 $("#smemo").click(function() {
 
@@ -300,7 +308,6 @@ ipcRenderer.on('showtx', (event, msg) => {
 
 
 ipcRenderer.on('appendnewmemo', (event, msg) => {
-
   $("#txlist").prepend('<div class="card shadow border-0 mb-3">'+
   '<div class="card-body">'+
       '<div class="row align-items-center">'+
