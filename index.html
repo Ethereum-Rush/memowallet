@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Maxartkiller">
 
-    <title>eRush Wallet</title>
+    <title>Memo Wallet</title>
 
     <!-- Material design icons CSS -->
     <link rel="stylesheet" href="vendor/materializeicon/material-icons.css">
@@ -42,11 +42,11 @@
         <!-- header ends -->
 
         <div class="container">
-            <div class="card bg-template shadow mt-4 h-190">
+            <div class="card blue-theme-bg shadow mt-4 h-190">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-auto">
-                            <figure class="avatar avatar-60"><img src="img/proeth.png" alt=""></figure>
+                            <figure class="avatar avatar-60"><img id="profileimg" src="" alt=""></figure>
                         </div>
                         <div class="col pl-0 align-self-center">
                             <input type="text" id="ethaddr" style="width:100%; background-color:transparent;color:white;border:0 solid black;" />
@@ -96,6 +96,7 @@
                           <input type="text" style="width:100%; "  placeholder="memo" id="memo" name="memo"/><br>
 
                           <button class="btn btn-primary" id="smemo"  style="width:100%; ">Send</button>
+                          <a id="showtransaction" href="" target="_blank"></a>
 
 
                       </div>
@@ -106,7 +107,7 @@
               </div>
           </div>
 
-            <h6 class="subtitle">Transaction List</h6>
+            <h6 class="subtitle">Memo TXs List</h6>
 
             <div  id="txlist">
 
@@ -230,6 +231,7 @@
     <!-- jquery, popper and bootstrap js -->
     <script src="js/jquery-3.3.1.min.js"></script>
     <script src="js/popper.min.js"></script>
+    <script src="js/blockies.min.js"></script>
     <script src="vendor/bootstrap-4.4.1/js/bootstrap.min.js"></script>
 
     <!-- swiper js -->
@@ -246,15 +248,20 @@
 
 <script type="text/javascript">
 window.$ = window.jQuery = require('jquery');
+var Web3 = require('web3');
 //const ipc = require('electron').ipcRenderer;
 const { ipcRenderer } = require('electron');
 let mybutton = document.querySelector("#connect");
 let ethereumPrivateKey =  document.querySelector("#priv");
 
 
-mybutton.addEventListener("click", () => {
+$("#connect").click(function() {
+  $("#connect").html('Please waıt.');
+  $("#connect").attr("disabled", true);
   ipcRenderer.send("receivekey", ethereumPrivateKey.value.trim());
 });
+
+
 
 
 $("#smemo").click(function() {
@@ -268,29 +275,62 @@ $("#smemo").click(function() {
    memodetails["amount"] = amount;//.trim();
    memodetails["memoo"] = memoo;//.trim();
 
+   $("#smemo").html('Please waıt.');
+   $("#smemo").attr("disabled", true);
+
   ipcRenderer.send("sendmemoplease", memodetails);
 });
 
 
+ipcRenderer.on('enableagain', (event, msg) => {
+$("#connect").attr("disabled", false);
+});
+
+ipcRenderer.on('enablememoagain', (event, msg) => {
+  $("#smemo").html("SEND");
+  $("#smemo").attr("disabled", false);
+});
+
+ipcRenderer.on('showtx', (event, msg) => {
+  $("#smemo").html("SEND");
+  $("#smemo").attr("disabled", false);
+  $("#showtransaction").attr("href", "https://etherscan.io/tx/"+msg);
+  $("#showtransaction").text("https://etherscan.io/tx/"+msg)
+});
 
 
 ipcRenderer.on('appendnewmemo', (event, msg) => {
 
-  $("#txlist").append('<div class="card shadow border-0 mb-3">'+
+  $("#txlist").prepend('<div class="card shadow border-0 mb-3">'+
   '<div class="card-body">'+
       '<div class="row align-items-center">'+
           '<div class="col-auto pr-0">'+
-              '<div class="avatar avatar-60 no-shadow border-0">'+
-                  '<img src="img/swal.png" alt="">'+
+              '<div class="avatar avatar-60 no-shadow border-0 ">'+
+                  '<img class="'+msg["3"] +'" src="img/swal.png" alt="">'+
               '</div>'+
           '</div>'+
           '<div class="col">'+
-              '<h6 class="font-weight-normal mb-1">'+ msg["1"] +' EER </h6>'+
+              '<h6 class="font-weight-normal mb-1">'+ Web3.utils.fromWei(msg["1"] , 'ether') +' EER </h6>'+
               '<p class="text-mute small text-secondary"> '+ msg["2"] +' </p>'+
           '</div>'+
       '</div>'+
       '</div>'+
   '</div>');
+
+  var icon = blockies.create({ // All options are optional
+    seed: msg["3"], // seed used to generate icon data, default: random
+    //color: '#dfe', // to manually specify the icon color, default: random
+    //bgcolor: '#aaa', // choose a different background color, default: random
+    size: 15, // width/height of the icon in blocks, default: 8
+    scale: 3, // width/height of each block in pixels, default: 4
+    //spotcolor: '#000' // each pixel has a 13% chance of being of a third color,
+    // default: random. Set to -1 to disable it. These "spots" create structures
+    // that look like eyes, mouths and noses.
+  });
+  console.log(icon);
+   $('.'+msg["3"]).attr('src', icon.toDataURL());
+
+
   //alert(msg["2"])
 
 
@@ -299,6 +339,7 @@ ipcRenderer.on('appendnewmemo', (event, msg) => {
 
 
 ipcRenderer.on('getdatils', (event, msg) => {
+
   console.log("msg", msg);
   //alert(msg["eerbalance"]);
   document.getElementById("balance").innerHTML = msg["eerbalance"] + " EER and " + msg["ethbalance"] + " ETH"  ;
@@ -307,6 +348,21 @@ ipcRenderer.on('getdatils', (event, msg) => {
   $("#ethaddr").val(msg["address"]);
   document.getElementById("llogin").style.display = "none";
   document.getElementById("bbox").style.display = "block"; //balance
+
+  var icon = blockies.create({ // All options are optional
+    seed: msg["address"], // seed used to generate icon data, default: random
+    //color: '#dfe', // to manually specify the icon color, default: random
+    //bgcolor: '#aaa', // choose a different background color, default: random
+    size: 15, // width/height of the icon in blocks, default: 8
+    scale: 3, // width/height of each block in pixels, default: 4
+    //spotcolor: '#000' // each pixel has a 13% chance of being of a third color,
+    // default: random. Set to -1 to disable it. These "spots" create structures
+    // that look like eyes, mouths and noses.
+  });
+  console.log(icon);
+   $('#profileimg').attr('src', icon.toDataURL());
+
+
 
 
 });

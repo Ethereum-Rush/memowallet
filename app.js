@@ -4,7 +4,7 @@ const {app, ipcRenderer, BrowserWindow, ipcMain, dialog} =  require('electron');
 const Tx = require('ethereumjs-tx').Transaction
 var pkkey = '';
 var Web3 = require('web3');
-const web3 = new Web3('https://mainnet.infura.io/v3/');
+const web3 = new Web3('https://mainnet.infura.io/v3/914bc8ee83c746a9801f4a57f0432aff');
 var hdkey = require('ethereumjs-wallet/hdkey');
 const ethUtils = require('ethereumjs-util');
 var oldresult = 999999999;
@@ -61,6 +61,86 @@ mainWindow.on('closed', function() {
 
 ipcMain.on('sendmemoplease', (event, memodetails) => {
   console.log(memodetails);
+  if(memodetails["amount"] == '' || memodetails["memoo"] == '' || memodetails["rece"] == '') {
+
+    mainWindow.send("enablememoagain", "true");
+    const options = {
+    type: 'question',
+    buttons: ['Okey.'],
+    defaultId: 2,
+    title: 'Warning',
+    message: 'Receiver amount or receiver require.',
+    detail: 'Please fill everywhere',
+    };
+
+    dialog.showMessageBox(null, options, (response, checkboxChecked) => {
+    console.log(response);
+    console.log(checkboxChecked);
+    });
+
+
+  } else {
+    console.log("ok");
+    var xxnewamo = web3.utils.toWei(memodetails["amount"], 'ether');
+    console.log("xxnewamo", xxnewamo);
+    const grpice  = web3.eth.getGasPrice().then(function(networkgasprice){
+      console.log("networkgasprice",networkgasprice);
+    var MyContract = new web3.eth.Contract(abi, contractAddress, {
+        from: myetheraddress,
+        gasPrice: web3.utils.toWei(networkgasprice, 'gwei')
+    });
+
+
+
+
+    MyContract.methods.sendtokenwithmemo(xxnewamo, memodetails["rece"], memodetails["memoo"] ).estimateGas({from: myetheraddress})
+      .then(function(gasAmount){
+              console.log("gasolina", gasAmount);
+                console.log("gasolin222a", web3.utils.toHex(web3.utils.toWei(networkgasprice, 'gwei')));
+
+              web3.eth.getTransactionCount(myetheraddress).then(function(nonce){
+                console.log("my nonce value is here:", nonce);
+                dataTx = MyContract.methods.sendtokenwithmemo(xxnewamo, memodetails["rece"], memodetails["memoo"]).encodeABI();  //The encoded ABI of the method
+
+
+                 console.log("dataTx",dataTx);
+                 var rawTx = {
+                 'from': myetheraddress,
+                 'chainId': 1,
+                 'gas': web3.utils.toHex(gasAmount),
+                 'data':dataTx,
+                 'to': contractAddress,
+                 'gasPrice': web3.utils.toHex(networkgasprice),
+                 'nonce':  web3.utils.toHex(nonce) }
+
+                 var tx = new Tx(rawTx);
+                 console.log("tx",tx);
+                 tx.sign(pkkey);
+                 var serializedTx = tx.serialize();
+                 console.log("serializedTx",serializedTx);
+
+                 web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).then(function(TxHash){
+                    console.log("TxHash",TxHash);
+                    console.log("real tx hash",TxHash["transactionHash"]);
+                    mainWindow.send("showtx", TxHash["transactionHash"]);
+                });
+              });
+      })
+      .catch(function(err){
+            console.log("gasolina err", err);
+      });
+
+
+    }).catch(function(err){
+      console.log(err)
+    });
+
+
+
+
+  }
+  //omgbb
+
 });
 
 
@@ -106,7 +186,7 @@ ipcMain.on('receivekey', (event, privateKey) => {
   else if(e instanceof RangeError) {
     // handle RangeError
     console.log("I need a valid eth private key.")
-
+    mainWindow.send("enableagain", "true");
     const options = {
     type: 'question',
     buttons: ['Okey.'],
@@ -117,6 +197,8 @@ ipcMain.on('receivekey', (event, privateKey) => {
   };
 
   dialog.showMessageBox(null, options, (response, checkboxChecked) => {
+
+    console.log(enableagain);
     console.log(response);
     console.log(checkboxChecked);
   });
@@ -148,6 +230,7 @@ function getbalance() {
           web3.eth.getBalance(myetheraddress).then(function(balance){
             var bal = web3.utils.fromWei(balance);
             if(bal < 0.01) {
+                mainWindow.send("enableagain", "true");
                 const options = {
                 type: 'question',
                 buttons: ['I understand problem, i will load ethereum to this address.'],
