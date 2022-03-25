@@ -17,10 +17,10 @@
   },
   "homepage": "https://github.com/Ethereum-Rush/memowallet#readme",
   "devDependencies": {
-    "electron": "^7.1.2"
+    "electron": "^13.6.6"
   },
   "dependencies": {
-    "electron": "^7.1.2",
+    "electron": "^13.6.6",
     "electron-packager": "^14.2.1",
     "ethereum-hdwallet": "0.0.26",
     "ethereumjs-tx": "^2.1.2",
